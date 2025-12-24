@@ -38,15 +38,45 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	// Testcontainers for PostgreSQL integration tests
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:postgresql'
+	testImplementation 'org.testcontainers:junit-jupiter'
 	testRuntimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion"
+		mavenBom "org.testcontainers:testcontainers-bom:1.20.4"
 	}
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Run only unit tests (exclude IT and E2E)
+tasks.register('unitTest', Test) {
+	useJUnitPlatform()
+	filter {
+		excludeTestsMatching '*IT'
+		excludeTestsMatching '*E2E'
+	}
+}
+
+// Run only integration tests
+tasks.register('integrationTest', Test) {
+	useJUnitPlatform()
+	filter {
+		includeTestsMatching '*IT'
+	}
+}
+
+// Run only e2e tests
+tasks.register('e2eTest', Test) {
+	useJUnitPlatform()
+	filter {
+		includeTestsMatching '*E2E'
+	}
 }
